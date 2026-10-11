@@ -86,7 +86,10 @@ export default function Register() {
         </div>
         <label className="flex items-start gap-2 text-sm">
           <input type="checkbox" checked={confirm18} onChange={(e) => setConfirm18(e.target.checked)} className="mt-1" />
-          I confirm that I am 18 years of age or older.
+          <span>
+            I confirm that I am 18 years of age or older, and I agree to the{' '}
+            <Link to="/terms" className="underline">Terms</Link> and <Link to="/privacy" className="underline">Privacy Policy</Link>.
+          </span>
         </label>
         {err && <p role="alert" className="text-sm text-red-600">{err}</p>}
         <button className={primaryBtn} disabled={busy}>{busy ? 'Creating account…' : 'Create account'}</button>

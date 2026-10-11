@@ -52,6 +52,8 @@ export default function Notifications() {
           if (n.type === 'match') { text = `It’s a match with ${name}!`; to = `/messages/${n.payload.match_id}`; Icon = Heart; }
           if (n.type === 'like') { text = `${name} liked you`; to = '/home'; Icon = Heart; }
           if (n.type === 'message') { text = `New message from ${name}`; to = `/messages/${n.payload.conversation_id}`; Icon = MessageCircle; }
+          if (n.type === 'post_like') { text = `${name} liked your post`; to = '/profile'; Icon = Heart; }
+          if (n.type === 'comment') { text = `${name} commented on your post`; to = '/profile'; Icon = MessageCircle; }
           const unread = fresh.current.has(n.id);
           return (
             <li key={n.id}>

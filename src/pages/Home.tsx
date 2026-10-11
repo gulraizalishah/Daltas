@@ -5,6 +5,7 @@ import { Heart, MoreHorizontal, X } from 'lucide-react';
 import { supabase } from '../supabase';
 import type { FeedProfile } from '../types';
 import ProfileCard from '../components/ProfileCard';
+import ProfileSheet from '../components/ProfileSheet';
 import MatchModal from '../components/MatchModal';
 import MoreSheet from '../components/MoreSheet';
 import { ghostBtn, primaryBtn } from '../ui';
@@ -16,6 +17,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [match, setMatch] = useState<{ p: FeedProfile; matchId: string } | null>(null);
   const [more, setMore] = useState(false);
+  const [info, setInfo] = useState(false);
   const fetching = useRef(false);
   const queueRef = useRef<FeedProfile[]>([]);
   const seen = useRef(new Set<string>());
@@ -55,6 +57,7 @@ export default function Home() {
     seen.current.add(p.user_id);
     setQueue((q) => q.slice(1));
     setError(null);
+    setInfo(false);
     if (queue.length <= 4 && !exhausted) void loadMore();
 
     if (kind === 'pass') {
@@ -85,6 +88,7 @@ export default function Home() {
     seen.current.add(p.user_id);
     setQueue((q) => q.filter((x) => x.user_id !== p.user_id));
     setMore(false);
+    setInfo(false);
   }
 
   if (loading) {
@@ -106,7 +110,7 @@ export default function Home() {
       {top ? (
         <>
           <div className="min-h-0 flex-1">
-            <ProfileCard key={top.user_id} p={top} onLike={() => void act('like')} onPass={() => void act('pass')} />
+            <ProfileCard key={top.user_id} p={top} onLike={() => void act('like')} onPass={() => void act('pass')} onInfo={() => setInfo(true)} />
           </div>
           <div className="flex shrink-0 items-center justify-center gap-5 py-3">
             <RoundBtn label="Pass" onClick={() => void act('pass')}><X size={28} className="text-neutral-700" /></RoundBtn>
@@ -125,6 +129,10 @@ export default function Home() {
         </div>
       )}
 
+      {info && top && (
+        <ProfileSheet p={top} onClose={() => setInfo(false)} onLike={() => void act('like')} onPass={() => void act('pass')}
+          onReport={report} onBlock={block} />
+      )}
       {match && <MatchModal p={match.p} matchId={match.matchId} onClose={() => setMatch(null)} />}
       {more && top && <MoreSheet name={top.display_name} onClose={() => setMore(false)} onReport={report} onBlock={block} />}
     </div>
