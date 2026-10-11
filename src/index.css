@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+html, body, #root { height: 100%; }
+html { overscroll-behavior-y: none; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+button, a { touch-action: manipulation; }
+input, select, textarea { font-size: 16px; } /* stops iOS zooming into form fields */
+
+@keyframes pop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes pulse-soft { 50% { opacity: 0.5; } }
