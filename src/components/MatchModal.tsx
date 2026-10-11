@@ -3,7 +3,9 @@ import type { FeedProfile } from '../types';
 import { photoUrl } from '../lib/photos';
 import { ghostBtn, primaryBtn } from '../ui';
 
-export default function MatchModal({ p, onClose }: { p: FeedProfile; onClose: () => void }) {
+type Props = { p: FeedProfile; matchId: string; onClose: () => void };
+
+export default function MatchModal({ p, matchId, onClose }: Props) {
   return (
     <div role="dialog" aria-modal="true" aria-label="It’s a match" className="fixed inset-0 z-50 grid place-items-center bg-black/80 p-6">
       <div className="w-full max-w-sm rounded-3xl bg-white p-6 text-center [animation:pop_.25s_ease-out]">
@@ -16,7 +18,7 @@ export default function MatchModal({ p, onClose }: { p: FeedProfile; onClose: ()
         )}
         <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-rose-500">IT’S A MATCH!</h2>
         <p className="mt-2 text-neutral-600">You and {p.display_name} liked each other.</p>
-        <Link to="/matches" onClick={onClose} className={`${primaryBtn} mt-5 block`}>View matches</Link>
+        <Link to={`/messages/${matchId}`} onClick={onClose} className={`${primaryBtn} mt-5 block`}>Send message</Link>
         <button onClick={onClose} className={`${ghostBtn} mt-2 w-full`}>Keep browsing</button>
       </div>
     </div>

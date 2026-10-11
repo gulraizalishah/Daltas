@@ -50,6 +50,10 @@ export default function Matches() {
             <div className="p-3">
               <p className="font-semibold">{m.display_name}, {m.age}</p>
               <p className="text-xs text-neutral-500">Matched {timeAgo(m.matched_at)}</p>
+              <Link to={`/messages/${m.match_id}`}
+                className="mt-2 block rounded-full bg-rose-500 py-2 text-center text-sm font-medium text-white hover:bg-rose-400">
+                Message
+              </Link>
             </div>
           </li>
         ))}

@@ -14,7 +14,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [exhausted, setExhausted] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [match, setMatch] = useState<FeedProfile | null>(null);
+  const [match, setMatch] = useState<{ p: FeedProfile; matchId: string } | null>(null);
   const [more, setMore] = useState(false);
   const fetching = useRef(false);
   const queueRef = useRef<FeedProfile[]>([]);
@@ -65,7 +65,7 @@ export default function Home() {
     const { data, error } = await supabase.rpc('like_user', { p_target: p.user_id });
     if (error) { console.error(error); return failed(p); }
     const row = Array.isArray(data) ? data[0] : data;
-    if (row?.matched) setMatch(p);
+    if (row?.matched && row.match_id) setMatch({ p, matchId: row.match_id });
   }
 
   async function report(reason: string) {
@@ -125,7 +125,7 @@ export default function Home() {
         </div>
       )}
 
-      {match && <MatchModal p={match} onClose={() => setMatch(null)} />}
+      {match && <MatchModal p={match.p} matchId={match.matchId} onClose={() => setMatch(null)} />}
       {more && top && <MoreSheet name={top.display_name} onClose={() => setMore(false)} onReport={report} onBlock={block} />}
     </div>
   );

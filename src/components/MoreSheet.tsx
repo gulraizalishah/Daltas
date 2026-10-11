@@ -7,10 +7,16 @@ const REASONS: [string, string][] = [
   ['underage', 'Underage user'], ['other', 'Other'],
 ];
 
-type Props = { name: string; onClose: () => void; onReport: (reason: string) => Promise<void>; onBlock: () => Promise<void> };
+type Props = {
+  name: string;
+  onClose: () => void;
+  onReport: (reason: string) => Promise<void>;
+  onBlock: () => Promise<void>;
+  onClear?: () => Promise<void>;
+};
 
-export default function MoreSheet({ name, onClose, onReport, onBlock }: Props) {
-  const [step, setStep] = useState<'menu' | 'report' | 'block'>('menu');
+export default function MoreSheet({ name, onClose, onReport, onBlock, onClear }: Props) {
+  const [step, setStep] = useState<'menu' | 'report' | 'block' | 'clear'>('menu');
   const [busy, setBusy] = useState(false);
   const run = async (fn: () => Promise<void>) => { setBusy(true); await fn(); setBusy(false); };
 
@@ -22,6 +28,7 @@ export default function MoreSheet({ name, onClose, onReport, onBlock }: Props) {
         {step === 'menu' && (
           <div className="grid gap-2">
             <h2 className="mb-1 text-lg font-semibold">{name}</h2>
+            {onClear && <button className={ghostBtn} onClick={() => setStep('clear')}>Delete conversation</button>}
             <button className={ghostBtn} onClick={() => setStep('report')}>Report</button>
             <button className={ghostBtn} onClick={() => setStep('block')}>Block</button>
             <button className="py-2 text-neutral-500" onClick={onClose}>Cancel</button>
@@ -40,9 +47,18 @@ export default function MoreSheet({ name, onClose, onReport, onBlock }: Props) {
         {step === 'block' && (
           <div className="grid gap-3">
             <h2 className="text-lg font-semibold">Block {name}?</h2>
-            <p className="text-sm text-neutral-600">You won’t see each other again anywhere in the app, including Live.</p>
+            <p className="text-sm text-neutral-600">You won’t see each other again anywhere in the app, including Live and messages.</p>
             <button disabled={busy} className="rounded-full bg-red-600 px-5 py-2.5 font-medium text-white disabled:opacity-60"
               onClick={() => run(onBlock)}>{busy ? 'Blocking…' : 'Block'}</button>
+            <button className="py-2 text-neutral-500" onClick={() => setStep('menu')}>Back</button>
+          </div>
+        )}
+        {step === 'clear' && onClear && (
+          <div className="grid gap-3">
+            <h2 className="text-lg font-semibold">Delete this conversation?</h2>
+            <p className="text-sm text-neutral-600">It disappears from your side only. {name} keeps their copy, and a new message from either of you starts it again.</p>
+            <button disabled={busy} className="rounded-full bg-red-600 px-5 py-2.5 font-medium text-white disabled:opacity-60"
+              onClick={() => run(onClear)}>{busy ? 'Deleting…' : 'Delete'}</button>
             <button className="py-2 text-neutral-500" onClick={() => setStep('menu')}>Back</button>
           </div>
         )}
