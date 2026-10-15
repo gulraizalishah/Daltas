@@ -13,6 +13,7 @@ export function useLive() {
   const [peer, setPeer] = useState<Peer | null>(null);
   const [micOn, setMicOn] = useState(true);
   const [camOn, setCamOn] = useState(true);
+  const [speakerOn, setSpeakerOn] = useState(true);
   const [reported, setReported] = useState(false);
 
   const localVideo = useRef<HTMLVideoElement>(null);
@@ -31,6 +32,11 @@ export function useLive() {
   useEffect(() => {
     if (localVideo.current && streamRef.current) localVideo.current.srcObject = streamRef.current;
   }, [state]);
+
+  // Mute or unmute the other person's audio (handy when testing two phones side by side).
+  useEffect(() => {
+    if (remoteVideo.current) remoteVideo.current.muted = !speakerOn;
+  }, [state, speakerOn]);
 
   const clearTimers = useCallback(() => {
     Object.values(timers.current).forEach((t) => { window.clearInterval(t); window.clearTimeout(t); });
@@ -174,7 +180,10 @@ export function useLive() {
     if (!navigator.mediaDevices?.getUserMedia || !window.RTCPeerConnection) return setState('unsupported');
     setState('requesting_media');
     try {
-      streamRef.current = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true });
+      streamRef.current = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user' },
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
     } catch (e: any) {
       console.error('getUserMedia failed:', e?.name, e?.message);
       return setState(
@@ -224,6 +233,7 @@ export function useLive() {
     const t = streamRef.current?.getVideoTracks()[0];
     if (t) { t.enabled = !t.enabled; setCamOn(t.enabled); }
   };
+  const toggleSpeaker = () => setSpeakerOn((on) => !on);
 
   const block = useCallback(async () => {
     const sid = sessionRef.current;
@@ -241,7 +251,7 @@ export function useLive() {
   }, []);
 
   return {
-    state, peer, micOn, camOn, reported, localVideo, remoteVideo,
-    start, stop, next, findSomeone: beginSearch, toggleMic, toggleCam, block, report,
+    state, peer, micOn, camOn, speakerOn, reported, localVideo, remoteVideo,
+    start, stop, next, findSomeone: beginSearch, toggleMic, toggleCam, toggleSpeaker, block, report,
   };
 }

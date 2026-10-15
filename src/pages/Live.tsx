@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { Ban, ChevronUp, Flag, Mic, MicOff, PhoneOff, Video, VideoOff } from 'lucide-react';
+import { Ban, ChevronUp, Flag, Mic, MicOff, PhoneOff, Video, VideoOff, Volume2, VolumeX } from 'lucide-react';
 import { useLive } from '../useLive';
 
 const REASONS: [string, string][] = [
@@ -109,6 +109,7 @@ export default function Live() {
           <div className="flex items-center gap-3">
             <Btn label={live.micOn ? 'Mute microphone' : 'Unmute microphone'} onClick={live.toggleMic}>{live.micOn ? <Mic /> : <MicOff />}</Btn>
             <Btn label={live.camOn ? 'Turn camera off' : 'Turn camera on'} onClick={live.toggleCam}>{live.camOn ? <Video /> : <VideoOff />}</Btn>
+            <Btn label={live.speakerOn ? 'Mute their audio' : 'Unmute their audio'} onClick={live.toggleSpeaker}>{live.speakerOn ? <Volume2 /> : <VolumeX />}</Btn>
             <Btn label="End call" onClick={() => void stop()} danger><PhoneOff /></Btn>
             {state === 'connected' && (
               <>

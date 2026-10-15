@@ -1,10 +1,12 @@
+import { useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
-import { Navigate, NavLink, Outlet, Route, Routes } from 'react-router-dom';
+import { Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Bell, Heart, Home as HomeIcon, MessageCircle, User, Video } from 'lucide-react';
 import { useAuth } from './auth';
 import { useBadges } from './useBadges';
 import { supabase } from './supabase';
 import { CONTACT_EMAIL } from './lib/site';
+import { useSwipeTabs } from './lib/useSwipeTabs';
 import { primaryBtn, ghostBtn } from './ui';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -80,6 +82,9 @@ const links: { to: string; label: string; Icon: typeof HomeIcon; badge?: Badge; 
   { to: '/profile', label: 'Profile', Icon: User },
 ];
 
+// Order used by swiping left/right (matches the mobile tab bar)
+const TAB_ORDER = ['/home', '/live', '/matches', '/messages', '/profile'];
+
 function Pill({ n, className = '' }: { n: number; className?: string }) {
   if (n <= 0) return null;
   return (
@@ -91,8 +96,31 @@ function Pill({ n, className = '' }: { n: number; className?: string }) {
 
 function Shell() {
   const badges = useBadges();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [dir, setDir] = useState<'next' | 'prev' | null>(null);
+  const tabIdx = TAB_ORDER.indexOf(pathname);   // -1 on sub-pages (settings, edit profile, notifications, admin…)
+
+  useEffect(() => {
+    if (!dir) return;
+    const t = window.setTimeout(() => setDir(null), 300);
+    return () => window.clearTimeout(t);
+  }, [dir, pathname]);
+
+  const swipe = useSwipeTabs({
+    enabled: tabIdx !== -1,
+    onSwipe: (d) => {
+      const target = TAB_ORDER[tabIdx + (d === 'next' ? 1 : -1)];
+      if (!target) return;       // already at the first or last tab
+      setDir(d);
+      navigate(target);
+    },
+  });
+
   const count = (b?: Badge) => (b ? badges[b] : 0);
   const label = (l: string, n: number) => (n > 0 ? `${l}, ${n} unread` : l);
+  const anim = dir === 'next' ? '[animation:slide-from-right_.22s_ease-out]'
+    : dir === 'prev' ? '[animation:slide-from-left_.22s_ease-out]' : '';
 
   const side = ({ isActive }: { isActive: boolean }) =>
     `flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 ${isActive ? 'bg-rose-50 text-rose-600' : 'text-neutral-600 hover:bg-neutral-100'}`;
@@ -125,8 +153,13 @@ function Shell() {
         </nav>
       </aside>
 
-      <main className="flex h-[100dvh] flex-col overflow-y-auto px-3 pt-[calc(3.5rem_+_env(safe-area-inset-top))] pb-[calc(5rem_+_env(safe-area-inset-bottom))] md:px-6 md:pb-6 md:pt-6">
-        <div className="mx-auto flex min-h-0 w-full max-w-xl flex-1 flex-col"><Outlet /></div>
+      <main
+        {...swipe}
+        className="flex h-[100dvh] flex-col overflow-y-auto px-3 pt-[calc(3.5rem_+_env(safe-area-inset-top))] pb-[calc(5rem_+_env(safe-area-inset-bottom))] md:px-6 md:pb-6 md:pt-6"
+      >
+        <div key={pathname} className={`mx-auto flex min-h-0 w-full max-w-xl flex-1 flex-col ${anim}`}>
+          <Outlet />
+        </div>
       </main>
 
       <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-20 flex border-t border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">

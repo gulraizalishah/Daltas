@@ -109,7 +109,7 @@ export default function Home() {
 
       {top ? (
         <>
-          <div className="min-h-0 flex-1">
+          <div className="min-h-0 flex-1" data-no-tab-swipe>
             <ProfileCard key={top.user_id} p={top} onLike={() => void act('like')} onPass={() => void act('pass')} onInfo={() => setInfo(true)} />
           </div>
           <div className="flex shrink-0 items-center justify-center gap-5 py-3">
